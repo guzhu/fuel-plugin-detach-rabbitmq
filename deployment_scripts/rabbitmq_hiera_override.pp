@@ -36,8 +36,9 @@ if ($detach_rabbitmq_plugin) {
                         'username'     => $rabbit_user,
                         'password'     => $rabbit_password,
                       })
-
-  case hiera_array('roles', 'none') {
+  $roles = join(hiera('roles'), ',')
+  notice("roles:$roles")
+  case $roles {
     /standalone-rabbitmq/: {
       $rabbit_enabled = true
       $corosync_roles = $rabbitmq_roles
@@ -52,7 +53,7 @@ if ($detach_rabbitmq_plugin) {
 
   $calculated_content = inline_template('<%
 require "yaml"
-amqp_hosts = @amqp_hosts.map {|x| x + ":" + @amqp_port}.join(",")
+amqp_hosts = @amqp_hosts.map {|x| x + ":" + @amqp_port.to_s}.join(",")
 data = {
   "amqp_hosts" => amqp_hosts,
   "transport_url" => @transport_url,
